@@ -5,7 +5,7 @@
 # Uses pfctl tables instead of ipset
 
 SCRIPT_NAME="ipset-blacklist-opnsense"
-VERSION="2.0.3-opnsense"
+VERSION="$(cat VERSION)-opnsense"
 
 # Configuration
 CONFIG_FILE="/usr/local/etc/blacklist-sources.conf"

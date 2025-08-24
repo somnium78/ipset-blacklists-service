@@ -1,4 +1,4 @@
-name: Build and Release DEB Package
+name: Build Multi-Platform Packages
 
 permissions:
   contents: write
@@ -12,86 +12,57 @@ on:
 jobs:
   build-deb:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install build dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y dpkg-dev
-
-    - name: Extract version from tag
-      id: version
-      run: |
-        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-          VERSION=${GITHUB_REF#refs/tags/v}
-        else
-          VERSION="2.0.2-dev"
-        fi
-        echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-        echo "Building version: ${VERSION}"
-
-    - name: Update version in build script
-      run: |
-        sed -i "s/VERSION=\"2.0.2\"/VERSION=\"${{ steps.version.outputs.VERSION }}\"/" build-deb.sh
-
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y dpkg-dev
     - name: Build DEB package
-      run: |
-        chmod +x build-deb.sh
-        ./build-deb.sh
-
-    - name: Test DEB package
-      run: |
-        echo "📋 Package info:"
-        dpkg-deb --info *.deb
-        echo ""
-        echo "📁 Package contents:"
-        dpkg-deb --contents *.deb
-
-    - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          *.deb
-        generate_release_notes: true
-        name: "ipset-blacklists-service ${{ steps.version.outputs.VERSION }}"
-        body: |
-          ## 📦 DEB Package Release
-
-          **Installation:**
-
-          Download and install the DEB package:
-
-          wget https://github.com/somnium78/ipset-blacklists-service/releases/download/v${{ steps.version.outputs.VERSION }}/ipset-blacklists-service_${{ steps.version.outputs.VERSION }}_all.deb
-
-          sudo dpkg -i ipset-blacklists-service_${{ steps.version.outputs.VERSION }}_all.deb
-
-          sudo systemctl start ipset-blacklist-boot.service
-
-          sudo systemctl start ipset-blacklist-update.timer
-
-          **Uninstallation:**
-
-          sudo apt remove ipset-blacklists-service
-
-          **Status check:**
-
-          sudo /usr/local/bin/ipset-blacklist-status
-
-          **Features:**
-          - Professional DEB package installation
-          - Automatic dependency management
-          - Clean systemd integration
-          - Complete uninstallation support
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload artifact
+      run: chmod +x build-deb.sh && ./build-deb.sh
+    - name: Upload DEB artifact
       uses: actions/upload-artifact@v4
       with:
         name: deb-package
         path: "*.deb"
-        retention-days: 30
+
+  build-opnsense:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build OPNsense package
+      run: cd opnsense-port && chmod +x build-opnsense-package.sh && ./build-opnsense-package.sh
+    - name: Upload OPNsense artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: opnsense-package
+        path: "opnsense-port/*.tar.gz"
+
+  create-release:
+    needs: [build-deb, build-opnsense]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        path: ./packages/
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          packages/**/*.deb
+          packages/**/*.tar.gz
+        name: "Release ${GITHUB_REF_NAME}"
+        body: |
+          ## Multi-Platform Blacklist Service
+
+          **Linux Package:** ipset-blacklists-service_*_all.deb
+          **OPNsense Package:** ipset-blacklists-opnsense-*-opnsense.tar.gz
+
+          **Installation:**
+          - Linux: Download DEB → dpkg -i → systemctl enable ipset-blacklist-update.timer
+          - OPNsense: Download tarball → extract → ./scripts/install-opnsense.sh
+
+          **Documentation:** See README.md for detailed instructions.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
