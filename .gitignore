@@ -28,3 +28,9 @@ Thumbs.db
 # Runtime directories (will be created by scripts)
 var/
 tmp/
+
+# DEB package build artifacts
+debian-package/
+*.deb
+*.buildinfo
+*.changes

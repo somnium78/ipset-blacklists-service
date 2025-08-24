@@ -15,24 +15,33 @@ Professional systemd-integrated IP blacklist service with diff-based updates and
 - 📊 **Monitoring** - Check_MK plugin included
 - 🧹 **Log rotation** - Automatic log management
 - 🔧 **Easy management** - Simple install/uninstall scripts
+- 📦 DEB package - Professional package management
 
-## 🎯 Quick Start
+# 🎯 Quick Start
 
-### Installation
-
-1. **Clone repository:**
+## 📦 Installation via DEB Package (Recommended)
 ```bash
+# Download latest release:
+wget https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-service_2.0.1_all.deb
+
+# Install package:
+sudo dpkg -i ipset-blacklists-service_2.0.1_all.deb
+
+# Start services:
+sudo systemctl start ipset-blacklist-boot.service sudo systemctl start ipset-blacklist-update.timer
+```
+
+
+## Manual Installation
+```bash
+# Clone repository:
 git clone https://github.com/somnium78/ipset-blacklists-service.git
 cd ipset-blacklists-service
-```
 
-2. **Install service:**
-```bash
+# Install service:
 sudo ./install.sh
-```
 
-3. **Start services:**
-```bash
+# Start services:
 sudo systemctl start ipset-blacklist-boot.service
 sudo systemctl start ipset-blacklist-update.timer
 ```
