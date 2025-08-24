@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Check_MK Agent Plugin for ipset Blacklist Service
+# Returns service status, entry count, and performance data
+
+IPSET_NAME="blacklist_inbound"
+WORK_DIR="/var/lib/ipset-blacklist"
+LOG_FILE="/var/log/ipset-blacklist.log"
+
+# Initialize status
+status=0
+status_text="OK"
+perfdata=""
+details=""
+
+# Check if ipset exists and get entry count
+if ipset list "$IPSET_NAME" >/dev/null 2>&1; then
+    entry_count=$(ipset list "$IPSET_NAME" | grep "Number of entries" | awk '{print $4}')
+
+    if [[ -n "$entry_count" && "$entry_count" -gt 0 ]]; then
+        details="ipset active with $entry_count entries"
+        perfdata="entries=${entry_count};;;0;"
+
+        # Check if entry count is suspiciously low (less than 1000)
+        if [[ "$entry_count" -lt 1000 ]]; then
+            status=1
+            status_text="WARNING"
+            details="$details (suspiciously low entry count)"
+        fi
+    else
+        status=2
+        status_text="CRITICAL"
+        details="ipset exists but has no entries"
+        perfdata="entries=0;;;0;"
+    fi
+else
+    status=2
+    status_text="CRITICAL"
+    details="ipset $IPSET_NAME not found"
+    perfdata="entries=0;;;0;"
+fi
+
+# Check iptables rule
+if ! iptables -C INPUT -m set --match-set "$IPSET_NAME" src -j DROP 2>/dev/null; then
+    if [[ $status -lt 2 ]]; then
+        status=1
+        status_text="WARNING"
+    fi
+    details="$details, iptables rule missing"
+fi
+
+# Check log file age (should be updated within last 6 hours)
+if [[ -f "$LOG_FILE" ]]; then
+    log_age=$(( $(date +%s) - $(stat -c %Y "$LOG_FILE" 2>/dev/null || echo 0) ))
+    log_age_hours=$(( log_age / 3600 ))
+
+    if [[ $log_age_hours -gt 6 ]]; then
+        if [[ $status -lt 1 ]]; then
+            status=1
+            status_text="WARNING"
+        fi
+        details="$details, log file older than 6 hours"
+    fi
+
+    perfdata="$perfdata log_age_hours=${log_age_hours};6;12;0;"
+else
+    if [[ $status -lt 1 ]]; then
+        status=1
+        status_text="WARNING"
+    fi
+    details="$details, log file missing"
+    perfdata="$perfdata log_age_hours=999;6;12;0;"
+fi
+
+# Check work directory
+if [[ ! -d "$WORK_DIR" ]]; then
+    status=2
+    status_text="CRITICAL"
+    details="$details, work directory missing"
+fi
+
+# Output in Check_MK format
+echo "$status ipset_blacklist - $status_text - $details|$perfdata"
