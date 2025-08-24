@@ -138,3 +138,28 @@ GPL-3.0 License - see [LICENSE](LICENSE) file for details.
 **🚀 Ready for production deployment!**
 
 For support and updates, visit: [https://github.com/somnium78/ipset-blacklists-service](https://github.com/somnium78/ipset-blacklists-service)
+
+## 🔥 OPNsense Port
+
+**NEW:** Native OPNsense/FreeBSD port available!
+
+### 📦 OPNsense Installation
+
+1. **Download OPNsense package:**
+wget https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.2-opnsense.tar.gz
+2. **Extract and install:**
+tar -xzf ipset-blacklists-opnsense-2.0.2-opnsense.tar.gz
+cd ipset-blacklists-opnsense-2.0.2-opnsense
+sudo ./scripts/install-opnsense.sh
+3. **Add firewall rule:**
+block in quick on $ext_if from <blacklist_inbound> to any
+
+### 🎯 OPNsense Features
+
+- ✅ **pfctl tables** instead of ipset
+- ✅ **Native FreeBSD** compatibility  
+- ✅ **Cron-based** automatic updates
+- ✅ **Same diff-logic** as Linux version
+- ✅ **Easy installation** and management
+
+**Documentation:** [OPNsense README](opnsense-port/docs/README-OPNsense.md)

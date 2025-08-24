@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# OPNsense Blacklist Status Script
+
+TABLE_NAME="blacklist_inbound"
+WORK_DIR="/var/db/blacklist"
+LOG_FILE="/var/log/blacklist.log"
+
+echo "🛡️  OPNsense Blacklist Service Status"
+echo "======================================"
+
+# Check if table exists
+if pfctl -t "$TABLE_NAME" -T show >/dev/null 2>&1; then
+    ENTRY_COUNT=$(pfctl -t "$TABLE_NAME" -T show 2>/dev/null | wc -l | tr -d ' ')
+    echo "✅ pfctl table '$TABLE_NAME': $ENTRY_COUNT entries"
+else
+    echo "❌ pfctl table '$TABLE_NAME': NOT FOUND"
+    exit 1
+fi
+
+# Check statistics file
+if [ -f "$WORK_DIR/stats.txt" ]; then
+    echo ""
+    echo "📊 Last Update Statistics:"
+    while IFS='=' read -r key value; do
+        case "$key" in
+            last_update) echo "   Last Update: $value" ;;
+            total_sources) echo "   Total Sources: $value" ;;
+            successful_sources) echo "   Successful Sources: $value" ;;
+            final_count) echo "   Final Count: $value" ;;
+            version) echo "   Version: $value" ;;
+        esac
+    done < "$WORK_DIR/stats.txt"
+else
+    echo "⚠️  No statistics available - run update first"
+fi
+
+# Check cron job
+if crontab -l 2>/dev/null | grep -q "ipset-blacklist-opnsense"; then
+    echo ""
+    echo "⏰ Cron Job: ACTIVE"
+    echo "   $(crontab -l 2>/dev/null | grep ipset-blacklist-opnsense)"
+else
+    echo ""
+    echo "⚠️  Cron Job: NOT CONFIGURED"
+fi
+
+# Check firewall rules
+echo ""
+echo "🔥 Firewall Integration:"
+if pfctl -sr 2>/dev/null | grep -q "$TABLE_NAME"; then
+    echo "   ✅ Firewall rules using table '$TABLE_NAME' found"
+    pfctl -sr 2>/dev/null | grep "$TABLE_NAME" | head -3
+else
+    echo "   ⚠️  No firewall rules found using table '$TABLE_NAME'"
+    echo "   Add rule: block in quick on \$ext_if from <$TABLE_NAME> to any"
+fi
+
+# Recent log entries
+if [ -f "$LOG_FILE" ]; then
+    echo ""
+    echo "📝 Recent Log Entries:"
+    tail -5 "$LOG_FILE" | sed 's/^/   /'
+fi
+
+echo ""
+echo "🔧 Management Commands:"
+echo "   Update now: /usr/local/bin/ipset-blacklist-opnsense"
+echo "   View table: pfctl -t $TABLE_NAME -T show | head -10"
+echo "   Clear table: pfctl -t $TABLE_NAME -T flush"
+echo "   View logs: tail -f $LOG_FILE"

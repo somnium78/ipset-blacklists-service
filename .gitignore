@@ -34,3 +34,7 @@ debian-package/
 *.deb
 *.buildinfo
 *.changes
+
+# OPNsense port build artifacts
+opnsense-port/build/
+opnsense-port/*.tar.gz

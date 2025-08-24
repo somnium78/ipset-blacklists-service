@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# OPNsense Blacklist Cleanup Script
+
+TABLE_NAME="blacklist_inbound"
+WORK_DIR="/var/db/blacklist"
+LOG_FILE="/var/log/blacklist.log"
+
+echo "🧹 Cleaning up OPNsense Blacklist Service..."
+
+# Remove pfctl table
+if pfctl -t "$TABLE_NAME" -T show >/dev/null 2>&1; then
+    pfctl -t "$TABLE_NAME" -T flush 2>/dev/null
+    echo "✅ Cleared pfctl table: $TABLE_NAME"
+else
+    echo "ℹ️  pfctl table '$TABLE_NAME' not found"
+fi
+
+# Clean work directory
+if [ -d "$WORK_DIR" ]; then
+    rm -rf "$WORK_DIR"/*
+    echo "✅ Cleaned work directory: $WORK_DIR"
+fi
+
+# Rotate log
+if [ -f "$LOG_FILE" ]; then
+    mv "$LOG_FILE" "${LOG_FILE}.old"
+    touch "$LOG_FILE"
+    echo "✅ Rotated log file: $LOG_FILE"
+fi
+
+echo ""
+echo "🔧 Manual cleanup commands:"
+echo "   Remove cron job: crontab -e (remove blacklist line)"
+echo "   Remove firewall rules: edit firewall rules in OPNsense GUI"
+echo "   Remove files: rm -rf /usr/local/bin/ipset-blacklist-* /usr/local/etc/blacklist-sources.conf"
+
+echo ""
+echo "✅ Cleanup completed!"
