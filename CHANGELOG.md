@@ -2,6 +2,17 @@
 
 All notable changes to ipset-blacklists-service will be documented here.
 
+## [2.0.1] - 2025-08-24
+
+### 🐛 Fixed
+- **Installation bug** - Create required directories during installation
+- **Systemd service failure** - `/tmp/ipset-blacklist` directory now created by installer
+- **Fresh install issue** - Service now starts correctly on first boot without manual intervention
+
+### 🔧 Changed
+- **install.sh** - Added creation of `/tmp/ipset-blacklist` and `/var/lib/ipset-blacklist` directories
+- **Directory permissions** - Set proper permissions (755) for work directories
+
 ## [2.0.0] - 2025-08-24
 
 ### 🎉 Initial Release

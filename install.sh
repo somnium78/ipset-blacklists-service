@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # ipset Blacklist Service Installer
-# Version: 2.0.0
+# Version: 2.0.1
 
 set -e
 
-echo "=== ipset Blacklist Service Installer v2.0.0 ==="
+echo "=== ipset Blacklist Service Installer v2.0.1 ==="
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
@@ -26,6 +26,9 @@ echo "✅ All dependencies found"
 # Create directories
 echo "Creating directories..."
 mkdir -p /var/lib/ipset-blacklist /var/log /etc/ipset-blacklist
+mkdir -p /tmp/ipset-blacklist
+chmod 755 /tmp/ipset-blacklist
+chmod 755 /var/lib/ipset-blacklist
 
 # Install scripts
 echo "Installing scripts..."
