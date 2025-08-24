@@ -5,13 +5,14 @@
 # Uses pfctl tables instead of ipset
 
 SCRIPT_NAME="ipset-blacklist-opnsense"
-VERSION="2.0.2-opnsense"
+VERSION="2.0.3-opnsense"
 
 # Configuration
 CONFIG_FILE="/usr/local/etc/blacklist-sources.conf"
 WORK_DIR="/var/db/blacklist"
 LOG_FILE="/var/log/blacklist.log"
 TABLE_NAME="blacklist_inbound"
+ALIAS_NAME="blacklist_ips"
 TEMP_DIR="/tmp/blacklist-$$"
 MAX_LOG_SIZE=10485760  # 10MB
 
@@ -55,28 +56,51 @@ if ! pfctl -t "$TABLE_NAME" -T show >/dev/null 2>&1; then
     pfctl -t "$TABLE_NAME" -T delete 0.0.0.0/32 2>/dev/null || true
 fi
 
-# Process each blacklist source
+# Process each blacklist source - FIXED PARSER
 TOTAL_SOURCES=0
 SUCCESSFUL_SOURCES=0
 
-while IFS= read -r line || [ -n "$line" ]; do
-    # Skip comments and empty lines
-    case "$line" in
-        \#*|'') continue ;;
-    esac
-
-    TOTAL_SOURCES=$((TOTAL_SOURCES + 1))
-
-    # Parse source configuration
-    name=$(echo "$line" | awk -F'"' '{print $2}')
-    url=$(echo "$line" | awk -F'"' '{print $4}')
-    format=$(echo "$line" | awk -F'"' '{print $6}')
-    description=$(echo "$line" | awk -F'"' '{print $8}')
+# Read config file and parse multi-line entries
+awk '
+BEGIN { 
+    in_entry = 0
+    name = ""
+    url = ""
+    format = ""
+    description = ""
+}
+/^[[:space:]]*"[^"]*"[[:space:]]*$/ {
+    if (in_entry == 0) {
+        name = $0
+        gsub(/^[[:space:]]*"|"[[:space:]]*$/, "", name)
+        in_entry = 1
+    } else if (in_entry == 1) {
+        url = $0
+        gsub(/^[[:space:]]*"|"[[:space:]]*$/, "", url)
+        in_entry = 2
+    } else if (in_entry == 2) {
+        format = $0
+        gsub(/^[[:space:]]*"|"[[:space:]]*$/, "", format)
+        in_entry = 3
+    } else if (in_entry == 3) {
+        description = $0
+        gsub(/^[[:space:]]*"|"[[:space:]]*$/, "", description)
+        print name "|" url "|" format "|" description
+        in_entry = 0
+        name = ""
+        url = ""
+        format = ""
+        description = ""
+    }
+}
+/^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
+' "$CONFIG_FILE" | while IFS='|' read -r name url format description; do
 
     if [ -z "$name" ] || [ -z "$url" ]; then
-        log "Warning: Invalid configuration line: $line"
         continue
     fi
+
+    TOTAL_SOURCES=$((TOTAL_SOURCES + 1))
 
     log "Processing: $description ($name)"
 
@@ -91,8 +115,10 @@ while IFS= read -r line || [ -n "$line" ]; do
                 grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$' "$TEMP_DIR/${name}_raw.txt" > "$TEMP_DIR/${name}_clean.txt" 2>/dev/null || touch "$TEMP_DIR/${name}_clean.txt"
                 ;;
             "mixed"|*)
-                # Auto-detect format - handle both IPs and CIDRs
-                grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(/[0-9]{1,2})?$' "$TEMP_DIR/${name}_raw.txt" > "$TEMP_DIR/${name}_clean.txt" 2>/dev/null || touch "$TEMP_DIR/${name}_clean.txt"
+                # Auto-detect format - handle both IPs and CIDRs, filter comments
+                grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(/[0-9]{1,2})?[[:space:]]*$' "$TEMP_DIR/${name}_raw.txt" | \
+                sed 's/[[:space:]]*;.*$//' | \
+                grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(/[0-9]{1,2})?$' > "$TEMP_DIR/${name}_clean.txt" 2>/dev/null || touch "$TEMP_DIR/${name}_clean.txt"
                 ;;
         esac
 
@@ -107,7 +133,29 @@ while IFS= read -r line || [ -n "$line" ]; do
         log "  → Error: Failed to download $name from $url"
         touch "$TEMP_DIR/${name}_clean.txt"
     fi
-done < "$CONFIG_FILE"
+done
+
+# Count sources (since we're in a subshell, we need to recount)
+TOTAL_SOURCES=$(awk '
+BEGIN { 
+    in_entry = 0
+    count = 0
+}
+/^[[:space:]]*"[^"]*"[[:space:]]*$/ {
+    if (in_entry == 0) {
+        in_entry = 1
+    } else if (in_entry == 1) {
+        in_entry = 2
+    } else if (in_entry == 2) {
+        in_entry = 3
+    } else if (in_entry == 3) {
+        count++
+        in_entry = 0
+    }
+}
+/^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
+END { print count }
+' "$CONFIG_FILE")
 
 # Merge all clean files and remove duplicates
 if ls "$TEMP_DIR"/*_clean.txt >/dev/null 2>&1; then
@@ -117,6 +165,8 @@ else
 fi
 
 NEW_COUNT=$(wc -l < "$TEMP_DIR/blacklist_new.txt" | tr -d ' ')
+SUCCESSFUL_SOURCES=$(ls "$TEMP_DIR"/*_clean.txt 2>/dev/null | wc -l | tr -d ' ')
+
 log "Processed $SUCCESSFUL_SOURCES/$TOTAL_SOURCES sources successfully"
 log "Total unique entries: $NEW_COUNT"
 
@@ -141,17 +191,17 @@ if [ -f "$CURRENT_FILE" ]; then
     # Apply changes to pfctl table
     if [ "$ADD_COUNT" -gt 0 ]; then
         if pfctl -t "$TABLE_NAME" -T add -f "$TEMP_DIR/to_add.txt" 2>/dev/null; then
-            log "Successfully added $ADD_COUNT entries"
+            log "Successfully added $ADD_COUNT entries to pfctl table"
         else
-            log "Warning: Some entries could not be added to table"
+            log "Warning: Some entries could not be added to pfctl table"
         fi
     fi
 
     if [ "$REMOVE_COUNT" -gt 0 ]; then
         if pfctl -t "$TABLE_NAME" -T delete -f "$TEMP_DIR/to_remove.txt" 2>/dev/null; then
-            log "Successfully removed $REMOVE_COUNT entries"
+            log "Successfully removed $REMOVE_COUNT entries from pfctl table"
         else
-            log "Warning: Some entries could not be removed from table"
+            log "Warning: Some entries could not be removed from pfctl table"
         fi
     fi
 
@@ -159,21 +209,42 @@ if [ -f "$CURRENT_FILE" ]; then
         log "No changes needed - blacklist is up to date"
     fi
 else
-    log "Initial load: adding all $NEW_COUNT entries to table"
+    log "Initial load: adding all $NEW_COUNT entries to pfctl table"
     if pfctl -t "$TABLE_NAME" -T replace -f "$TEMP_DIR/blacklist_new.txt" 2>/dev/null; then
-        log "Successfully loaded initial blacklist"
+        log "Successfully loaded initial blacklist into pfctl table"
     else
-        log "Error: Failed to load initial blacklist into table"
+        log "Error: Failed to load initial blacklist into pfctl table"
         exit 1
     fi
 fi
 
-# Save current state
+# Save current state for both pfctl and OPNsense alias
 cp "$TEMP_DIR/blacklist_new.txt" "$CURRENT_FILE"
+
+# Update OPNsense alias table if it exists
+if pfctl -t "$ALIAS_NAME" -T show >/dev/null 2>&1; then
+    if pfctl -t "$ALIAS_NAME" -T replace -f "$CURRENT_FILE" 2>/dev/null; then
+        log "Successfully updated OPNsense alias table: $ALIAS_NAME"
+    else
+        log "Warning: Could not update OPNsense alias table: $ALIAS_NAME"
+    fi
+else
+    # Create alias table for OPNsense Web GUI
+    if pfctl -t "$ALIAS_NAME" -T add -f "$CURRENT_FILE" 2>/dev/null; then
+        log "Created OPNsense alias table: $ALIAS_NAME"
+    else
+        log "Info: OPNsense alias table not created (normal if using Web GUI aliases)"
+    fi
+fi
 
 # Final statistics
 FINAL_COUNT=$(pfctl -t "$TABLE_NAME" -T show 2>/dev/null | wc -l | tr -d ' ')
+ALIAS_COUNT=$(pfctl -t "$ALIAS_NAME" -T show 2>/dev/null | wc -l | tr -d ' ')
+
 log "pfctl table '$TABLE_NAME' now contains $FINAL_COUNT entries"
+if [ "$ALIAS_COUNT" -gt 0 ]; then
+    log "OPNsense alias '$ALIAS_NAME' now contains $ALIAS_COUNT entries"
+fi
 
 # Save statistics for monitoring
 cat > "$WORK_DIR/stats.txt" << STATS_EOF
@@ -181,7 +252,9 @@ last_update=$(date '+%Y-%m-%d %H:%M:%S')
 total_sources=$TOTAL_SOURCES
 successful_sources=$SUCCESSFUL_SOURCES
 final_count=$FINAL_COUNT
+alias_count=$ALIAS_COUNT
 version=$VERSION
 STATS_EOF
 
 log "Blacklist update completed successfully"
+log "OPNsense Web GUI: Use alias 'blacklist_ips' with file:///var/db/blacklist/blacklist_current.txt"

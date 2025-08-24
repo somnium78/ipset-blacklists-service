@@ -152,7 +152,8 @@ tar -xzf ipset-blacklists-opnsense-2.0.2-opnsense.tar.gz
 cd ipset-blacklists-opnsense-2.0.2-opnsense
 sudo ./scripts/install-opnsense.sh
 3. **Add firewall rule:**
-block in quick on $ext_if from <blacklist_inbound> to any
+Create Alias + Firewall Rule via Web GUI
+
 
 ### 🎯 OPNsense Features
 
