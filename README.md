@@ -4,7 +4,6 @@
 [![Version](https://img.shields.io/github/v/release/somnium78/ipset-blacklists-service)](https://github.com/somnium78/ipset-blacklists-service/releases)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)](https://github.com/somnium78/ipset-blacklists-service)
 [![Systemd](https://img.shields.io/badge/systemd-compatible-green)](https://systemd.io/)
-[![CrowdSec](https://img.shields.io/badge/CrowdSec-compatible-orange)](https://crowdsec.net/)
 
 Professional systemd-integrated IP blacklist service with diff-based updates and boot recovery.
 
@@ -99,7 +98,6 @@ Edit `/etc/ipset-blacklist/blacklist-sources.conf` to customize blacklist source
 - **Spamhaus**: For reliable DROP and EDROP lists
 - **Firehol**: For community-maintained blacklists
 - **CheckMK Community**: For monitoring integration support
-- **CrowdSec**: For security stack integration
 - **trick77/ipset-blacklist**: For inspiration and foundational concepts
 
 ## 🤝 Contributing
