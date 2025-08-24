@@ -1,0 +1,30 @@
+/var/log/ipset-blacklist.log {
+    # Rotate daily
+    daily
+
+    # Keep 30 days of logs
+    rotate 30
+
+    # Compress old logs
+    compress
+    delaycompress
+
+    # Don't rotate if empty
+    notifempty
+
+    # Create new log file with correct permissions
+    create 0640 root root
+
+    # Don't error if log file is missing
+    missingok
+
+    # Use date as suffix
+    dateext
+    dateformat -%Y%m%d
+
+    # Post-rotation script
+    postrotate
+        # Send HUP signal to rsyslog if running
+        /bin/kill -HUP `cat /var/run/rsyslogd.pid 2> /dev/null` 2> /dev/null || true
+    endscript
+}

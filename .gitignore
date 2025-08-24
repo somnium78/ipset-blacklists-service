@@ -1,0 +1,30 @@
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Log files
+*.log
+
+# Backup files
+*.bak
+*.backup
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Runtime directories (will be created by scripts)
+var/
+tmp/
