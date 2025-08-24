@@ -15,9 +15,9 @@ fi
 
 # Stop and disable services
 echo "Stopping and disabling services..."
-systemctl stop ipset-blacklist.timer 2>/dev/null || true
+systemctl stop ipset-blacklist.timer ipset-blacklist-update.timer 2>/dev/null || true
 systemctl stop ipset-blacklist-boot.service 2>/dev/null || true
-systemctl disable ipset-blacklist.timer 2>/dev/null || true
+systemctl disable ipset-blacklist.timer ipset-blacklist-update.timer 2>/dev/null || true
 systemctl disable ipset-blacklist-boot.service 2>/dev/null || true
 
 # Clean up ipset and iptables

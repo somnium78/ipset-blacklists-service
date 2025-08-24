@@ -57,12 +57,12 @@ fi
 # Enable services
 echo "Enabling services..."
 systemctl enable ipset-blacklist-boot.service
-systemctl enable ipset-blacklist.timer
+systemctl enable ipset-blacklist-update.timer
 
 echo "✅ Installation completed successfully!"
 echo
 echo "Next steps:"
 echo "1. Review configuration: /etc/ipset-blacklist/blacklist-sources.conf"
 echo "2. Start boot service: systemctl start ipset-blacklist-boot.service"
-echo "3. Start timer: systemctl start ipset-blacklist.timer"
+echo "3. Start timer: systemctl start ipset-blacklist-update.timer"
 echo "4. Check status: /usr/local/bin/ipset-blacklist-status"
