@@ -1,5 +1,8 @@
 name: Build and Release DEB Package
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
@@ -25,14 +28,14 @@ jobs:
         if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
           VERSION=${GITHUB_REF#refs/tags/v}
         else
-          VERSION="2.0.1-dev"
+          VERSION="2.0.2-dev"
         fi
         echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
         echo "Building version: ${VERSION}"
 
     - name: Update version in build script
       run: |
-        sed -i "s/VERSION=\"2.0.1\"/VERSION=\"${{ steps.version.outputs.VERSION }}\"/" build-deb.sh
+        sed -i "s/VERSION=\"2.0.2\"/VERSION=\"${{ steps.version.outputs.VERSION }}\"/" build-deb.sh
 
     - name: Build DEB package
       run: |
