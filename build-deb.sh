@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="2.0.1"
+VERSION="2.0.2"
 PACKAGE_DIR="debian-package/ipset-blacklists-service-${VERSION}"
 
 echo "🚀 Building .deb package for ipset-blacklists-service v${VERSION}"
