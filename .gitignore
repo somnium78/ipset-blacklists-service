@@ -54,3 +54,4 @@ opnsense-port/dist/
 /tmp/
 *.tmp
 *~
+build/
