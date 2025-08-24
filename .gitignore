@@ -38,3 +38,19 @@ debian-package/
 # OPNsense port build artifacts
 opnsense-port/build/
 opnsense-port/*.tar.gz
+
+# Build artifacts
+*.tar.gz
+*.deb
+*.rpm
+*.zip
+
+# OPNsense build outputs
+opnsense-port/*.tar.gz
+opnsense-port/build/
+opnsense-port/dist/
+
+# Temporary build files
+/tmp/
+*.tmp
+*~
