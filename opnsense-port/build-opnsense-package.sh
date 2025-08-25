@@ -7,7 +7,7 @@ if [ -f ../VERSION ]; then
 elif [ -f VERSION ]; then
     VERSION="$(cat VERSION)-opnsense"
 else
-    VERSION="2.0.4-opnsense"
+    VERSION="2.0.6-opnsense"
 fi
 
 PACKAGE_NAME="ipset-blacklists-opnsense"
@@ -26,14 +26,19 @@ mkdir -p "$PACKAGE_DIR/etc"
 mkdir -p "$PACKAGE_DIR/scripts"
 mkdir -p "$PACKAGE_DIR/docs"
 
-# Copy files
-cp bin/* "$PACKAGE_DIR/bin/"
+# Copy and modify main binary with embedded version
+sed "s/VERSION=\$(cat VERSION)/VERSION=\"${VERSION}\"/" bin/ipset-blacklist-opnsense > "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
+chmod +x "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
+
+# Copy other binaries normally
+cp bin/ipset-blacklist-cleanup "$PACKAGE_DIR/bin/"
+cp bin/ipset-blacklist-status "$PACKAGE_DIR/bin/"
+chmod +x "$PACKAGE_DIR/bin/"*
+
+# Copy other files
 cp etc/* "$PACKAGE_DIR/etc/"
 cp scripts/* "$PACKAGE_DIR/scripts/"
 cp docs/* "$PACKAGE_DIR/docs/"
-
-# Make scripts executable
-chmod +x "$PACKAGE_DIR/bin/"*
 chmod +x "$PACKAGE_DIR/scripts/"*
 
 # Create tarball

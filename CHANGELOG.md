@@ -2,6 +2,89 @@
 
 All notable changes to ipset-blacklists-service will be documented here.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+
+## [2.0.7] - 2025-08-25
+
+### Fixed
+- **OPNsense**: Fixed system detection to use correct path `/usr/local/opnsense/version/base`
+- **OPNsense**: Embedded VERSION directly in binary to eliminate "VERSION file not found" error
+- **OPNsense**: Improved installation script with better error handling and feedback
+
+### Added
+- **Documentation**: Comprehensive OPNsense setup guide with critical alias refresh configuration
+- **Documentation**: Detailed troubleshooting section for OPNsense deployments
+- **Documentation**: Performance metrics and monitoring guidelines
+- **OPNsense**: Automatic cronjob configuration during installation (every 4 hours)
+
+### Changed
+- **OPNsense**: Installation process now runs without warnings on proper OPNsense systems
+- **Documentation**: Emphasized critical 2-hour alias refresh frequency requirement
+- **Build**: OPNsense package no longer requires external VERSION file
+
+## [2.0.6] - 2025-08-24
+
+### Fixed
+- **Build**: Include VERSION file in OPNsense package to prevent runtime errors
+- **OPNsense**: Improved system detection logic
+
+### Added
+- **Build**: Better OPNsense package structure with all required files
+
+## [2.0.5] - 2025-08-24
+
+### Added
+- **CI/CD**: Complete automated multi-platform build system
+- **Build**: Professional DEB package creation with proper dependencies
+- **Build**: OPNsense tarball package with FreeBSD compatibility
+- **Release**: Automated GitHub releases with both Linux and OPNsense packages
+
+### Fixed
+- **Build**: Corrected file paths in build scripts to match actual repository structure
+- **Build**: Proper inclusion of all required files (binaries, configs, systemd units)
+
+### Changed
+- **Versioning**: Centralized version management through single VERSION file
+- **CI/CD**: GitHub Actions workflow for automated builds on tag creation
+
+## [2.0.4] - 2025-08-24
+
+### Added
+- **Core**: Initial automated build system setup
+- **Documentation**: Comprehensive README with installation instructions
+- **Build**: Basic build scripts for both platforms
+
+### Fixed
+- **Build**: Repository structure cleanup and organization
+
+## [2.0.3] - 2025-08-24
+
+### Added
+- **OPNsense**: Complete FreeBSD/OPNsense port with pfctl integration
+- **OPNsense**: Dual-mode operation (pfctl tables + OPNsense aliases)
+- **OPNsense**: Native FreeBSD installation and uninstallation scripts
+- **Monitoring**: Check_MK agent integration for both Linux and OPNsense
+
+### Enhanced
+- **Core**: Improved error handling and logging across all platforms
+- **Performance**: Optimized differential updates for large blacklists
+- **Documentation**: Platform-specific installation guides
+
+## [2.0.2] - 2025-08-24
+
+### Added
+- **Core**: Professional logging system with timestamps and structured output
+- **Core**: Comprehensive status reporting with detailed statistics
+- **Security**: Input validation and sanitization for all external data
+- **Performance**: Differential update system to minimize network usage
+
+### Enhanced
+- **Reliability**: Robust error handling with graceful degradation
+- **Monitoring**: Detailed success/failure tracking per blacklist source
+- **Usability**: Color-coded status output and clear user feedback
+
 ## [2.0.1] - 2025-08-24
 
 ### 🐛 Fixed

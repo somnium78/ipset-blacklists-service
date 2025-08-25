@@ -22,10 +22,10 @@ Professional systemd-integrated IP blacklist service with diff-based updates and
 ## 📦 Installation via DEB Package (Recommended)
 ```bash
 # Download latest release:
-wget https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-service_2.0.1_all.deb
+wget https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-service_2.0.7_all.deb
 
 # Install package:
-sudo dpkg -i ipset-blacklists-service_2.0.1_all.deb
+sudo dpkg -i ipset-blacklists-service_2.0.7_all.deb
 
 # Start services:
 sudo systemctl start ipset-blacklist-boot.service sudo systemctl start ipset-blacklist-update.timer
@@ -146,13 +146,13 @@ For support and updates, visit: [https://github.com/somnium78/ipset-blacklists-s
 ### 📦 OPNsense Installation
 
 1. **Download OPNsense package:**
-wget https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.2-opnsense.tar.gz
+fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.7-opnsense.tar.gz
 2. **Extract and install:**
-tar -xzf ipset-blacklists-opnsense-2.0.2-opnsense.tar.gz
-cd ipset-blacklists-opnsense-2.0.2-opnsense
+tar -xzf ipset-blacklists-opnsense-2.0.7-opnsense.tar.gz
+cd ipset-blacklists-opnsense-2.0.7-opnsense
 sudo ./scripts/install-opnsense.sh
 3. **Add firewall rule:**
-Create Alias + Firewall Rule via Web GUI
+Create Alias + Firewall Rule via Web GUI, see [OPNsense README](opnsense-port/docs/README-OPNsense.md)
 
 
 ### 🎯 OPNsense Features

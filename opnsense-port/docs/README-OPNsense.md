@@ -16,15 +16,14 @@ Professional blacklist service for OPNsense using pfctl tables instead of ipset.
 ### Installation
 ```bash
 # Method 1: Direct download from GitHub releases
-fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.2-opnsense.tar.gz
+fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.7-opnsense.tar.gz
 
 # Method 2: Clone repository and build
 git clone https://github.com/somnium78/ipset-blacklists-service.git
 cd ipset-blacklists-service/opnsense-port
 ./build-opnsense-package.sh
-tar -xzf ipset-blacklists-opnsense-2.0.2-opnsense.tar.gz
-cd ipset-blacklists-opnsense-2.0.2-opnsense
-
+tar -xzf ipset-blacklists-opnsense-2.0.7-opnsense.tar.gz
+cd ipset-blacklists-opnsense-2.0.7-opnsense
 
 # Install
 ./scripts/install-opnsense.sh
@@ -48,7 +47,7 @@ Step 1: Create Blacklist Alias
     - Name: blacklist_ips
     - Type: URL Table (IPs)
     - Content: file:///var/db/blacklist/blacklist_current.txt
-    - Update Frequency: Daily
+    - Update Frequency: every 2 hours
     - Description: Blacklisted IPs from ipset-blacklist service
 - Click "Save"
 - Click "Apply" to activate
@@ -82,10 +81,10 @@ Step 2: Create Blocking Rule
 
 # 📋 Requirements
 
-    OPNsense (or FreeBSD with pfctl)
-    Root privileges for installation
-    Internet access for downloading blacklists
-    fetch utility (included in FreeBSD)
+- OPNsense (or FreeBSD with pfctl)
+- Root privileges for installation
+- Internet access for downloading blacklists
+- fetch utility (included in FreeBSD)
 
 # ⚙️ Configuration
 
@@ -122,18 +121,18 @@ Shows:
 
 # 🔧 Files and Locations
 
-    Scripts: /usr/local/bin/ipset-blacklist-*
-    Configuration: /usr/local/etc/blacklist-sources.conf
-    Work directory: /var/db/blacklist/
-    Log file: /var/log/blacklist.log
-    pfctl table: blacklist_inbound
+- Scripts: /usr/local/bin/ipset-blacklist-*
+- Configuration: /usr/local/etc/blacklist-sources.conf
+- Work directory: /var/db/blacklist/
+- Log file: /var/log/blacklist.log
+- pfctl table: blacklist_inbound
 
 # Log Management
 
-    Log file: /var/log/blacklist.log
-    Automatic rotation when file exceeds 10MB
-    View logs: tail -f /var/log/blacklist.log
-    Search logs: grep "ERROR\|Warning" /var/log/blacklist.log
+- Log file: /var/log/blacklist.log
+- Automatic rotation when file exceeds 10MB
+- View logs: tail -f /var/log/blacklist.log
+- Search logs: grep "ERROR\|Warning" /var/log/blacklist.log
 
 # 🔄 Automatic Alias Updates
 
@@ -158,6 +157,14 @@ sudo rm -f /usr/local/etc/blacklist-sources.conf
 sudo rm -rf /var/db/blacklist
 ```
 
+# 🚨 Important Notes
+
+- ⚠️ Alias Refresh: Should be set to 2 hours or less in OPNsense Web GUI
+- 🔄 Dual System: Uses both pfctl tables and OPNsense aliases for maximum compatibility
+- 📊 Monitoring: Regular status checks recommended via /usr/local/bin/ipset-blacklist-status
+- 🔥 Rule Priority: Place blacklist rule at top of WAN rules for best performance
+- 💾 Persistence: pfctl tables are recreated on boot, aliases persist automatically
+
 # 🎯 Performance Notes
 
 - Memory usage: ~1MB per 10,000 IPs
@@ -165,6 +172,40 @@ sudo rm -rf /var/db/blacklist
 - Network: Downloads only changed data
 - Firewall: pfctl tables are very efficient
 - Alias updates: Based on configured frequency
+
+# 🔍 Troubleshooting
+## Alias Not Updating
+```bash
+# Check if alias refresh frequency is set to 2 hours or less
+# Web GUI: Firewall → Aliases → Edit blacklist_ips → Refresh Frequency
+
+# Force alias reload
+pfctl -t blacklist_ips -T replace -f /var/db/blacklist/blacklist_current.txt
+```
+
+## Check Service Status
+```bash
+# Verify pfctl table
+pfctl -t blacklist_inbound -T show | wc -l
+
+# Check file contents
+wc -l /var/db/blacklist/blacklist_current.txt
+
+# Test manual update
+/usr/local/bin/ipset-blacklist-opnsense
+```
+
+## Log Analysis
+```bash
+# Recent activity
+tail -50 /var/log/blacklist.log
+
+# Error checking
+grep -i error /var/log/blacklist.log
+
+# Update statistics
+grep "entries from" /var/log/blacklist.log | tail -10
+```
 
 # 📄 License
 
