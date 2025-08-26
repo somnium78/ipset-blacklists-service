@@ -1,6 +1,6 @@
 # 🛡️ ipset Blacklist Service - OPNsense Port
 
-Professional blacklist service for OPNsense using pfctl tables instead of ipset.
+Professional blacklist service for OPNsense using pfctl tables and aliases instead of ipset.
 
 ## ✨ Features
 
@@ -17,11 +17,6 @@ Professional blacklist service for OPNsense using pfctl tables instead of ipset.
 ```bash
 # Method 1: Direct download from GitHub releases
 fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.7-opnsense.tar.gz
-
-# Method 2: Clone repository and build
-git clone https://github.com/somnium78/ipset-blacklists-service.git
-cd ipset-blacklists-service/opnsense-port
-./build-opnsense-package.sh
 tar -xzf ipset-blacklists-opnsense-2.0.7-opnsense.tar.gz
 cd ipset-blacklists-opnsense-2.0.7-opnsense
 
@@ -33,13 +28,17 @@ cd ipset-blacklists-opnsense-2.0.7-opnsense
 
 # Add firewall rule
 # see detailed instructions below!!
+
+# Method 2: Clone repository and build
+git clone https://github.com/somnium78/ipset-blacklists-service.git
+cd ipset-blacklists-service/opnsense-port
+./build-opnsense-package.sh
 ```
 
 ### 🔥 Firewall Rule Configuration
 
 ⚠️ IMPORTANT: You must create an Alias and Firewall Rule to actually block the IPs!
 Step 1: Create Blacklist Alias
-
 - Open OPNsense Web Interface
 - Navigate to: Firewall → Aliases
 - Click "+" to add new alias
@@ -53,7 +52,6 @@ Step 1: Create Blacklist Alias
 - Click "Apply" to activate
 
 Step 2: Create Blocking Rule
-
 - Navigate to: Firewall → Rules → WAN
 - Click "Add" (+ icon) to create new rule
 - Configure rule:
@@ -70,6 +68,7 @@ Step 2: Create Blocking Rule
     - Description: Block blacklisted IPs
 - Click "Save"
 - Click "Apply Changes"
+
 
 
 ## Usage

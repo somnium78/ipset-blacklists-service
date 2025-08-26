@@ -1,10 +1,34 @@
-# 📋 Changelog
+# Changelog
 
-All notable changes to ipset-blacklists-service will be documented here.
+All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.8] - 2025-08-26
+
+### Fixed
+- **OPNsense**: Fixed VERSION display showing only "-opnsense" instead of full version number
+- **Documentation**: Corrected invalid pfctl firewall rule command in documentation
+- **Documentation**: Clarified confusion between pfctl table `blacklist_inbound` and OPNsense alias `blacklist_ips`
+
+### Added
+- **Documentation**: Clear explanation of dual-system approach (pfctl + OPNsense alias)
+- **Documentation**: Method recommendations (Web GUI vs Command Line)
+- **Documentation**: Comprehensive setup guide with step-by-step instructions
+- **Installation**: Enhanced setup guide created during installation at `/tmp/opnsense-setup-guide.txt`
+
+### Changed
+- **Documentation**: Removed incorrect pfctl firewall rule syntax
+- **Documentation**: Emphasized Web GUI method as recommended approach
+- **Build**: Improved VERSION handling in OPNsense build script
+- **Installation**: Better user guidance during OPNsense installation process
+
+### Clarified
+- **OPNsense**: The service creates BOTH a pfctl table AND an OPNsense alias for maximum flexibility
+- **Usage**: Web GUI method with `blacklist_ips` alias is recommended for most users
+- **Advanced**: pfctl table `blacklist_inbound` available for command-line monitoring
+- **Rules**: All firewall rules must be configured through OPNsense Web GUI, not command line
 
 ## [2.0.7] - 2025-08-25
 
@@ -87,66 +111,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1] - 2025-08-24
 
-### 🐛 Fixed
-- **Installation bug** - Create required directories during installation
-- **Systemd service failure** - `/tmp/ipset-blacklist` directory now created by installer
-- **Fresh install issue** - Service now starts correctly on first boot without manual intervention
+### Added
+- **Core**: Multi-source blacklist aggregation system
+- **Sources**: Integration with Spamhaus, Firehol, GreenSnow, and Blocklist.de
+- **Linux**: Complete systemd integration with boot and update services
+- **Linux**: Professional DEB package with proper dependencies
+- **Management**: Cleanup utilities and status monitoring tools
 
-### 🔧 Changed
-- **install.sh** - Added creation of `/tmp/ipset-blacklist` and `/var/lib/ipset-blacklist` directories
-- **Directory permissions** - Set proper permissions (755) for work directories
+### Enhanced
+- **Performance**: Efficient ipset management with hash:net tables
+- **Reliability**: Atomic updates to prevent service interruption
+- **Documentation**: Complete installation and usage documentation
 
 ## [2.0.0] - 2025-08-24
 
-### 🎉 Initial Release
+### Added
+- **Architecture**: Complete rewrite for production environments
+- **Multi-Platform**: Native support for Linux (ipset) and OPNsense (pfctl)
+- **Automation**: Systemd timers and cron-based automatic updates
+- **Professional**: Enterprise-grade logging, monitoring, and error handling
+- **Packaging**: Professional DEB packages and OPNsense-compatible tarballs
 
-**Complete rewrite** of ipset blacklist service with professional features.
-
-### ✨ Added
-- 🔄 **Diff-based updates** - Only processes IP changes, dramatically faster updates
-- 🚀 **Boot recovery** - Automatically restores ipset after system reboot
-- ⏰ **Systemd integration** - Full systemd service and timer support
-- 📊 **Check_MK monitoring** - Professional monitoring plugin included
-- 🧹 **Log rotation** - Automatic log management with logrotate
-- 🔧 **Management scripts** - Status, cleanup, and maintenance tools
-- 📦 **Easy installation** - Automated install/uninstall scripts
-- 🛡️ **Security hardening** - Systemd security settings applied
-
-### 🏗️ Architecture
-- **Main service:** `ipset-blacklist-service` with diff algorithm
-- **Boot service:** `ipset-blacklist-boot.service` for system startup
-- **Update service:** `ipset-blacklist-update.service` for scheduled updates  
-- **Timer:** `ipset-blacklist-update.timer` runs every 4 hours
-- **Status tool:** `ipset-blacklist-status` for monitoring
-- **Cleanup tool:** `ipset-blacklist-cleanup` for maintenance
-
-### 📊 Default Sources
-- **Spamhaus DROP** - Known malicious networks
-- **Firehol Blocklist.de** - Recent bot attacks (48h)
-- **AbuseIPDB** - High confidence IPs (optional, large list)
-
-### 🔧 Technical Details
-- **Diff algorithm** reduces update time from 10+ minutes to <30 seconds
-- **Boot recovery** preserves blacklist across reboots
-- **Systemd hardening** with security restrictions
-- **Professional logging** with rotation and monitoring
-- **Modular configuration** for easy customization
-
-### 📁 File Structure
-```
-├── usr/local/bin/ # Main scripts
-├── etc/ipset-blacklist/ # Configuration
-├── systemd/system/ # Systemd integration
-├── etc/logrotate.d/ # Log rotation
-└── usr/lib/check_mk_agent/ # Monitoring plugin
-```
-
-### 🎯 Performance
-- **Small lists** (2k entries): ~6 seconds
-- **Large lists** (200k entries): ~10 minutes first run, <30 seconds updates
-- **Memory efficient** with ipset hash tables
-- **Network optimized** with timeout and retry logic
+### Changed
+- **Breaking**: Complete API and configuration format changes
+- **Performance**: Switched to differential updates for efficiency
+- **Security**: Enhanced input validation and sanitization
+- **Reliability**: Atomic operations and rollback capabilities
 
 ---
 
-*This project follows [Semantic Versioning](https://semver.org/)*
+## Version History Summary
+
+- **2.0.8**: Documentation fixes and VERSION display correction
+- **2.0.7**: OPNsense fixes and comprehensive documentation
+- **2.0.6**: Build system improvements and VERSION file handling
+- **2.0.5**: Complete automated CI/CD pipeline
+- **2.0.4**: Initial automated build system
+- **2.0.3**: OPNsense port and dual-platform support
+- **2.0.2**: Professional logging and monitoring
+- **2.0.1**: Multi-source integration and systemd
+- **2.0.0**: Production rewrite and multi-platform architecture
+
+## Links
+
+- [GitHub Repository](https://github.com/somnium78/ipset-blacklists-service)
+- [Latest Release](https://github.com/somnium78/ipset-blacklists-service/releases/latest)
+- [Issues](https://github.com/somnium78/ipset-blacklists-service/issues)

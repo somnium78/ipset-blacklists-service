@@ -3,11 +3,14 @@ set -e
 
 # Read version from central file
 if [ -f ../VERSION ]; then
-    VERSION="$(cat ../VERSION)-opnsense"
+    BASE_VERSION=$(cat ../VERSION)
+    VERSION="${BASE_VERSION}-opnsense"
 elif [ -f VERSION ]; then
-    VERSION="$(cat VERSION)-opnsense"
+    BASE_VERSION=$(cat VERSION)
+    VERSION="${BASE_VERSION}-opnsense"
 else
-    VERSION="2.0.6-opnsense"
+    BASE_VERSION="2.0.8"
+    VERSION="2.0.8-opnsense"
 fi
 
 PACKAGE_NAME="ipset-blacklists-opnsense"
@@ -28,6 +31,11 @@ mkdir -p "$PACKAGE_DIR/docs"
 
 # Copy and modify main binary with embedded version
 sed "s/VERSION=\$(cat VERSION)/VERSION=\"${VERSION}\"/" bin/ipset-blacklist-opnsense > "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
+
+# Also fix any other VERSION references
+sed -i "s/VERSION=\"\$VERSION\"/VERSION=\"${VERSION}\"/" "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
+sed -i "s/v\$VERSION/v${VERSION}/" "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
+
 chmod +x "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
 
 # Copy other binaries normally
