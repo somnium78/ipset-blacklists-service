@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.0.11] - 2025-08-26
+
+### Fixed
+- **OPNsense**: VERSION file now created in /usr/local/etc/blacklist_version
+
+## [2.0.9] - 2025-08-26
+
+### Fixed
+- **OPNsense**: Cron job now persistent in `/usr/local/etc/cron.d/` - survives reboots
+- **Naming**: Unified all references to use `blacklist_inbound` (eliminated confusion)
+
+### Added
+- **OPNsense**: Persistent cron job configuration in system directory
+- **Installation**: Better cron service restart handling
+- **Uninstall**: Enhanced uninstall script removes persistent cron job
+
+### Changed
+- **OPNsense**: Cron job location moved from user crontab to `/usr/local/etc/cron.d/ipset-blacklist`
+- **Documentation**: All aliases and references now consistently use `blacklist_inbound`
+- **Installation**: Improved cron service management during installation
+- **URLs**: Replaced wildcard download URLs with working concrete versions
+
+### Removed
+- **Confusion**: Eliminated mixed naming between `blacklist_ips` and `blacklist_inbound`
+- **Fragility**: Removed dependency on user crontab that gets lost on reboot
+
 ## [2.0.8] - 2025-08-26
 
 ### Fixed

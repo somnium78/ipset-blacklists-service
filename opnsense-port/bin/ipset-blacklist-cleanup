@@ -33,7 +33,7 @@ echo ""
 echo "🔧 Manual cleanup commands:"
 echo "   Remove cron job: crontab -e (remove blacklist line)"
 echo "   Remove firewall rules: edit firewall rules in OPNsense GUI"
-echo "   Remove files: rm -rf /usr/local/bin/ipset-blacklist-* /usr/local/etc/blacklist-sources.conf"
+echo "   Remove files: rm -rf /usr/local/bin/ipset-blacklist-* /usr/local/etc/blacklist-*"
 
 echo ""
 echo "✅ Cleanup completed!"

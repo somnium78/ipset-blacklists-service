@@ -25,6 +25,7 @@ rm -f /usr/local/bin/ipset-blacklist-status
 
 echo "⚙️  Removing configuration..."
 rm -f /usr/local/etc/blacklist-sources.conf
+rm -f /usr/local/etc/blacklist_version
 
 echo "📁 Removing data and logs..."
 rm -rf /var/db/blacklist
