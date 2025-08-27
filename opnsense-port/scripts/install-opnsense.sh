@@ -47,8 +47,9 @@ chmod +x /usr/local/bin/ipset-blacklist-opnsense
 chmod +x /usr/local/bin/ipset-blacklist-status
 
 echo "⚙️  Installing configuration..."
+# FIXED: Use correct path - it was always in etc/
 if [ ! -f "/usr/local/etc/blacklist-sources.conf" ]; then
-    cp "$PROJECT_ROOT/config/blacklist-sources.conf" /usr/local/etc/
+    cp "$PROJECT_ROOT/etc/blacklist-sources.conf" /usr/local/etc/
     echo -e "${GREEN}   ✅ Configuration file installed${NC}"
 else
     echo -e "${YELLOW}   ⚠️  Configuration file exists, skipping${NC}"

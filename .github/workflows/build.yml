@@ -1,0 +1,109 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up build environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential devscripts debhelper
+
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Update VERSION file
+      run: echo "${{ steps.version.outputs.VERSION }}" > VERSION
+
+    - name: Build Linux DEB package
+      run: |
+        chmod +x build/build-linux.sh
+        ./build/build-linux.sh
+
+    - name: Build OPNsense package
+      run: |
+        chmod +x build/build-opnsense.sh
+        ./build/build-opnsense.sh
+
+    - name: Verify packages
+      run: |
+        echo "=== Linux Package Contents ==="
+        if [ -f build/linux/*.deb ]; then
+          dpkg -c build/linux/*.deb | head -20
+        fi
+
+        echo "=== OPNsense Package Contents ==="
+        if [ -f build/opnsense/*.tar.gz ]; then
+          tar -tzf build/opnsense/*.tar.gz | head -20
+          echo "Checking for monitoring directory..."
+          tar -tzf build/opnsense/*.tar.gz | grep -E "(monitoring/|ipset_blacklist_opnsense)" || echo "Monitoring files missing!"
+        fi
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ steps.version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+        body: |
+          ## IPSet Blacklist Service v${{ steps.version.outputs.VERSION }}
+
+          ### Downloads
+
+          **Linux (Ubuntu/Debian):**
+          - ipset-blacklist-service_${{ steps.version.outputs.VERSION }}_all.deb - Complete DEB package with systemd integration
+
+          **OPNsense/FreeBSD:**
+          - ipset-blacklists-opnsense.tar.gz - Complete package with pfctl integration and Check_MK monitoring
+
+          ### Installation
+
+          **Linux:**
+          Download the DEB package and install with dpkg -i, then run apt-get install -f to fix dependencies if needed.
+
+          **OPNsense:**
+          Download to /root, extract with tar -xzf, change to the extracted directory, and run ./scripts/install-opnsense.sh
+
+          ### Features
+          - Multi-source blacklist aggregation (Spamhaus, Firehol, GreenSnow, Blocklist.de)
+          - Native platform integration (ipset for Linux, pfctl for OPNsense)
+          - Automatic updates with differential processing
+          - Professional logging and monitoring
+          - Check_MK integration for enterprise monitoring
+          - Web GUI integration for OPNsense
+
+          See CHANGELOG.md for detailed changes.
+
+    - name: Upload Linux DEB
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/linux/ipset-blacklist-service_${{ steps.version.outputs.VERSION }}_all.deb
+        asset_name: ipset-blacklist-service_${{ steps.version.outputs.VERSION }}_all.deb
+        asset_content_type: application/vnd.debian.binary-package
+
+    - name: Upload OPNsense Package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/opnsense/ipset-blacklists-opnsense.tar.gz
+        asset_name: ipset-blacklists-opnsense.tar.gz
+        asset_content_type: application/gzip

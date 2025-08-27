@@ -152,7 +152,7 @@ tar -xzf ipset-blacklists-opnsense-2.0.14-opnsense.tar.gz
 cd ipset-blacklists-opnsense-2.0.14-opnsense
 sudo ./scripts/install-opnsense.sh
 3. **Add firewall rule:**
-Create Alias + Firewall Rule via Web GUI, see [OPNsense README](opnsense-port/docs/README-OPNsense.md)
+Create Alias + Firewall Rule via Web GUI, see [OPNsense README](opnsense-port/README.md)
 
 
 ### 🎯 OPNsense Features
@@ -163,4 +163,4 @@ Create Alias + Firewall Rule via Web GUI, see [OPNsense README](opnsense-port/do
 - ✅ **Same diff-logic** as Linux version
 - ✅ **Easy installation** and management
 
-**Documentation:** [OPNsense README](opnsense-port/docs/README-OPNsense.md)
+**Documentation:** [OPNsense README](opnsense-port/README.md)
