@@ -16,6 +16,7 @@ fi
 echo "📁 Creating directories..."
 mkdir -p /usr/local/bin
 mkdir -p /usr/local/etc
+mkdir -p /usr/local/etc/cron.d
 mkdir -p /var/db/blacklist
 mkdir -p /var/log
 
@@ -26,14 +27,24 @@ chmod +x /usr/local/bin/ipset-blacklist-*
 echo "⚙️  Installing configuration..."
 cp etc/blacklist-sources.conf /usr/local/etc/
 
-echo "⏰ Setting up cron job..."
-# Remove existing cron job
-crontab -l 2>/dev/null | grep -v "ipset-blacklist-opnsense" | crontab -
+echo "⏰ Setting up persistent cron job..."
+# Remove any existing user cron jobs
+crontab -l 2>/dev/null | grep -v "ipset-blacklist-opnsense" | crontab - 2>/dev/null || true
 
-# Add new cron job (every 4 hours)
-(crontab -l 2>/dev/null; echo "0 */4 * * * /usr/local/bin/ipset-blacklist-opnsense >/dev/null 2>&1") | crontab -
+# Create persistent cron job in system directory
+cat > /usr/local/etc/cron.d/ipset-blacklist << 'CRON_EOF'
+# IPSet Blacklist Service - Automatic Updates
+# Updates blacklist every 4 hours
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-echo "🔥 Creating sample firewall rule..."
+0 */4 * * * root /usr/local/bin/ipset-blacklist-opnsense >/dev/null 2>&1
+CRON_EOF
+
+echo "🔄 Restarting cron service..."
+service cron restart 2>/dev/null || /usr/local/etc/rc.d/cron restart 2>/dev/null || true
+
+echo "🔥 Creating configuration guide..."
 cat > /tmp/opnsense-setup-guide.txt << 'GUIDE_EOF'
 # OPNsense Blacklist Setup Guide
 ===============================
@@ -42,7 +53,7 @@ cat > /tmp/opnsense-setup-guide.txt << 'GUIDE_EOF'
 
 1. Create Alias:
    - Go to: Firewall → Aliases
-   - Name: blacklist_ips
+   - Name: blacklist_inbound
    - Type: URL Table (IPs)
    - Content: file:///var/db/blacklist/blacklist_current.txt
    - Refresh Frequency: 2 hours (IMPORTANT!)
@@ -50,7 +61,7 @@ cat > /tmp/opnsense-setup-guide.txt << 'GUIDE_EOF'
 2. Create Firewall Rule:
    - Go to: Firewall → Rules → WAN
    - Action: Block
-   - Source: blacklist_ips (your alias)
+   - Source: blacklist_inbound (your alias)
    - Move rule to top for priority
 
 ## Advanced: pfctl Table Commands
@@ -60,7 +71,6 @@ Table size: pfctl -t blacklist_inbound -T show | wc -l
 
 Note: Firewall rules must be configured via Web GUI!
 GUIDE_EOF
-
 
 echo ""
 echo "✅ Installation completed successfully!"
@@ -73,15 +83,14 @@ echo "2. Check status:"
 echo "   /usr/local/bin/ipset-blacklist-status"
 echo ""
 echo "3. Configure firewall (see /tmp/opnsense-setup-guide.txt):"
-echo "   - Create alias 'blacklist_ips' in Web GUI"
+echo "   - Create alias 'blacklist_inbound' in Web GUI"
 echo "   - Set refresh frequency to 2 hours"
 echo "   - Create blocking rule using the alias"
 echo ""
 echo "4. Verify setup:"
-echo "   pfctl -t blacklist_inbound -T show | head -10"
+echo "   pfctl -t blacklist_inbound -T show | wc -l"
 echo ""
-echo "⏰ Automatic updates: Every 4 hours via cron"
+echo "⏰ Persistent cron job: /usr/local/etc/cron.d/ipset-blacklist"
 echo "📝 Logs: /var/log/blacklist.log"
 echo "⚙️  Config: /usr/local/etc/blacklist-sources.conf"
 echo "📋 Setup Guide: /tmp/opnsense-setup-guide.txt"
-

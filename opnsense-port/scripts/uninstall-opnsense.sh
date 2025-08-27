@@ -1,34 +1,45 @@
 #!/bin/sh
+set -e
 
 echo "🗑️  Uninstalling Blacklist Service from OPNsense..."
 echo "================================================="
 
-# Check if running as root
-if [ "$(id -u)" -ne 0 ]; then
-    echo "❌ Error: This script must be run as root"
-    exit 1
-fi
+echo "⏰ Removing cron jobs..."
+# Remove user cron job (if any)
+crontab -l 2>/dev/null | grep -v "ipset-blacklist-opnsense" | crontab - 2>/dev/null || true
 
-echo "🛑 Stopping and cleaning up service..."
-/usr/local/bin/ipset-blacklist-cleanup 2>/dev/null || true
+# Remove persistent cron job
+rm -f /usr/local/etc/cron.d/ipset-blacklist
 
-echo "⏰ Removing cron job..."
-crontab -l 2>/dev/null | grep -v "ipset-blacklist-opnsense" | crontab -
+# Restart cron service
+service cron restart 2>/dev/null || /usr/local/etc/rc.d/cron restart 2>/dev/null || true
 
-echo "🗂️  Removing files..."
+echo "🔥 Removing pfctl table..."
+pfctl -t blacklist_inbound -T flush 2>/dev/null || true
+pfctl -t blacklist_inbound -T kill 2>/dev/null || true
+
+echo "📋 Removing scripts..."
 rm -f /usr/local/bin/ipset-blacklist-opnsense
-rm -f /usr/local/bin/ipset-blacklist-status
 rm -f /usr/local/bin/ipset-blacklist-cleanup
+rm -f /usr/local/bin/ipset-blacklist-status
+
+echo "⚙️  Removing configuration..."
 rm -f /usr/local/etc/blacklist-sources.conf
 
-echo "🧹 Cleaning up data..."
+echo "📁 Removing data and logs..."
 rm -rf /var/db/blacklist
-rm -f /var/log/blacklist.log*
+rm -f /var/log/blacklist.log
+
+echo "🧹 Removing temporary files..."
+rm -f /tmp/opnsense-setup-guide.txt
 
 echo ""
 echo "✅ Uninstallation completed!"
 echo ""
-echo "🔧 Manual cleanup required:"
-echo "1. Remove firewall rules that use 'blacklist_inbound' table"
-echo "2. Check pfctl tables: pfctl -t blacklist_inbound -T show"
-echo "3. Remove table if needed: pfctl -t blacklist_inbound -T flush"
+echo "⚠️  Manual steps required:"
+echo "1. Remove alias 'blacklist_inbound' from OPNsense Web GUI"
+echo "   (Firewall → Aliases)"
+echo "2. Remove firewall rules using the alias"
+echo "   (Firewall → Rules → WAN)"
+echo ""
+echo "🔄 Apply changes in OPNsense Web GUI to complete removal"

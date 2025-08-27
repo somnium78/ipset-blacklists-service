@@ -16,9 +16,9 @@ Professional blacklist service for OPNsense using pfctl tables and aliases inste
 ### Installation
 ```bash
 # Method 1: Direct download from GitHub releases
-fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.7-opnsense.tar.gz
-tar -xzf ipset-blacklists-opnsense-2.0.7-opnsense.tar.gz
-cd ipset-blacklists-opnsense-2.0.7-opnsense
+fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.9-opnsense.tar.gz
+tar -xzf ipset-blacklists-opnsense-2.0.9-opnsense.tar.gz
+cd ipset-blacklists-opnsense-2.0.9-opnsense
 
 # Install
 ./scripts/install-opnsense.sh
@@ -43,11 +43,11 @@ Step 1: Create Blacklist Alias
 - Navigate to: Firewall → Aliases
 - Click "+" to add new alias
 - Configure alias:
-    - Name: blacklist_ips
+    - Name: blacklist_inbound
     - Type: URL Table (IPs)
     - Content: file:///var/db/blacklist/blacklist_current.txt
     - Update Frequency: every 2 hours
-    - Description: Blacklisted IPs from ipset-blacklist service
+    - Description: Automated IP blacklist
 - Click "Save"
 - Click "Apply" to activate
 
@@ -62,14 +62,45 @@ Step 2: Create Blocking Rule
     - TCP/IP Version: IPv4
     - Protocol: any
     - Source: Single host or Network
-    - Source: Select blacklist_ips from dropdown
+    - Source: Select blacklist_inbound from dropdown
     - Destination: any
     - Log: ✓ (optional - for monitoring)
     - Description: Block blacklisted IPs
 - Click "Save"
+- Move rule to top for priority
 - Click "Apply Changes"
 
+### ⚡ Advanced pfctl Table Management
 
+The service creates a pfctl table blacklist_inbound for advanced monitoring:
+```bash
+# View table contents
+pfctl -t blacklist_inbound -T show | head -10
+
+# Check table size
+pfctl -t blacklist_inbound -T show | wc -l
+
+# Table management (advanced)
+pfctl -t blacklist_inbound -T flush    # Clear table
+pfctl -t blacklist_inbound -T add 1.2.3.4  # Add IP
+
+```
+⚠️ Note: Firewall rules must be configured through OPNsense Web GUI!
+
+### 🔧 Verification & Management
+```bash
+# Check service status
+/usr/local/bin/ipset-blacklist-status
+
+# Manual update
+/usr/local/bin/ipset-blacklist-opnsense
+
+# View logs
+tail -f /var/log/blacklist.log
+
+# Check persistent cron job
+cat /usr/local/etc/cron.d/ipset-blacklist
+```
 
 ## Usage
 
@@ -133,14 +164,15 @@ Shows:
 - View logs: tail -f /var/log/blacklist.log
 - Search logs: grep "ERROR\|Warning" /var/log/blacklist.log
 
-# 🔄 Automatic Alias Updates
+# ⏰ Automatic Updates
 
-The service automatically updates /var/db/blacklist/blacklist_current.txt every 4 hours. The OPNsense alias will pick up changes based on the Update Frequency setting.
+- Update Frequency: Every 4 hours via persistent cron job
+- Cron Location: /usr/local/etc/cron.d/ipset-blacklist
+- Alias Refresh: Every 2 hours (set in Web GUI)
+- Persistence: Survives reboots automatically
+- Logging: All activities in /var/log/blacklist.log
 
-To force alias update:
-1. Firewall → Aliases
-2. Click refresh icon next to blacklist_ips
-3. Or set Update Frequency to "Daily" for automatic updates
+
 
 # 🗑️ Uninstallation
 ```
@@ -163,6 +195,7 @@ sudo rm -rf /var/db/blacklist
 - 📊 Monitoring: Regular status checks recommended via /usr/local/bin/ipset-blacklist-status
 - 🔥 Rule Priority: Place blacklist rule at top of WAN rules for best performance
 - 💾 Persistence: pfctl tables are recreated on boot, aliases persist automatically
+- 🚫 No CLI Rules: Firewall rules configured via Web GUI only
 
 # 🎯 Performance Notes
 
@@ -176,10 +209,10 @@ sudo rm -rf /var/db/blacklist
 ## Alias Not Updating
 ```bash
 # Check if alias refresh frequency is set to 2 hours or less
-# Web GUI: Firewall → Aliases → Edit blacklist_ips → Refresh Frequency
+# Web GUI: Firewall → Aliases → Edit blacklist_inbound → Refresh Frequency
 
 # Force alias reload
-pfctl -t blacklist_ips -T replace -f /var/db/blacklist/blacklist_current.txt
+pfctl -t blacklist_inbound -T replace -f /var/db/blacklist/blacklist_current.txt
 ```
 
 ## Check Service Status
