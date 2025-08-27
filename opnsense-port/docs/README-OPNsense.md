@@ -16,9 +16,9 @@ Professional blacklist service for OPNsense using pfctl tables and aliases inste
 ### Installation
 ```bash
 # Method 1: Direct download from GitHub releases
-fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.11-opnsense.tar.gz
-tar -xzf ipset-blacklists-opnsense-2.0.11-opnsense.tar.gz
-cd ipset-blacklists-opnsense-2.0.11-opnsense
+fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.12-opnsense.tar.gz
+tar -xzf ipset-blacklists-opnsense-2.0.12-opnsense.tar.gz
+cd ipset-blacklists-opnsense-2.0.12-opnsense
 
 # Install
 ./scripts/install-opnsense.sh

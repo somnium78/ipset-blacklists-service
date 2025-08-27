@@ -146,10 +146,10 @@ For support and updates, visit: [https://github.com/somnium78/ipset-blacklists-s
 ### 📦 OPNsense Installation
 
 1. **Download OPNsense package:**
-fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.11-opnsense.tar.gz
+fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.12-opnsense.tar.gz
 2. **Extract and install:**
-tar -xzf ipset-blacklists-opnsense-2.0.11-opnsense.tar.gz
-cd ipset-blacklists-opnsense-2.0.11-opnsense
+tar -xzf ipset-blacklists-opnsense-2.0.12-opnsense.tar.gz
+cd ipset-blacklists-opnsense-2.0.12-opnsense
 sudo ./scripts/install-opnsense.sh
 3. **Add firewall rule:**
 Create Alias + Firewall Rule via Web GUI, see [OPNsense README](opnsense-port/docs/README-OPNsense.md)

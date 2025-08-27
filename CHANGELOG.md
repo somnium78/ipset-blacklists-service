@@ -5,57 +5,91 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-## [2.0.11] - 2025-08-26
+## [2.0.12] - 2025-08-27
 
 ### Fixed
-- **OPNsense**: VERSION file now created in /usr/local/etc/blacklist_version
+- **Performance**: Restored original fast pfctl bulk operations (reverted from slow individual IP additions)
+- **Performance**: Script now completes in ~2 seconds instead of 30-60 seconds for 22,000+ IPs
+- **Naming**: All references now consistently use `blacklist_inbound` (eliminated remaining `blacklist_ips` references)
+- **Version**: Proper version file integration with fallback to embedded version
 
-## [2.0.9] - 2025-08-26
+### Changed
+- **OPNsense**: Reverted to proven v2.0.8 performance architecture with v2.0.11+ fixes
+- **pfctl**: Uses bulk operations (`pfctl -t table -T add -f file`) instead of individual IP loops
+- **Logging**: All user messages now reference `blacklist_inbound` consistently
+- **Version**: Enhanced version handling with `/usr/local/etc/blacklist_version` file
+
+### Performance
+- **Initial Load**: ~2 seconds for 22,424 IPs (was 30-60 seconds)
+- **Differential Updates**: Bulk add/remove operations for maximum efficiency
+- **Memory**: Optimized temporary file handling and cleanup
+
+### Technical Details
+- Restored original AWK-based config parser (fast and reliable)
+- Maintained 4-line configuration format compatibility
+- Enhanced error handling with performance optimizations
+- Proper FreeBSD/OPNsense compatibility maintained
+
+## [2.0.11] - 2025-08-27
+
+### Fixed
+- **OPNsense**: VERSION file now created in `/usr/local/etc/blacklist_version`
+- **Naming**: All output messages now use 'blacklist_inbound' consistently
+- **Installation**: Enhanced version file creation during installation
+
+### Added
+- **Version**: Embedded version fallback if file doesn't exist
+- **Build**: Version file creation in build and install scripts
+
+### Changed
+- **Output**: All user-facing messages reference `blacklist_inbound`
+- **Installation**: Version file properly managed during installation
+
+## [2.0.10] - 2025-08-27
 
 ### Fixed
 - **OPNsense**: Cron job now persistent in `/usr/local/etc/cron.d/` - survives reboots
+- **Documentation**: Fixed wildcard URLs that don't work with `fetch`/`wget` commands
 - **Naming**: Unified all references to use `blacklist_inbound` (eliminated confusion)
 
 ### Added
 - **OPNsense**: Persistent cron job configuration in system directory
-- **Installation**: Better cron service restart handling
-- **Uninstall**: Enhanced uninstall script removes persistent cron job
+- **Documentation**: Alternative installation methods (latest vs specific version)
 
 ### Changed
 - **OPNsense**: Cron job location moved from user crontab to `/usr/local/etc/cron.d/ipset-blacklist`
-- **Documentation**: All aliases and references now consistently use `blacklist_inbound`
-- **Installation**: Improved cron service management during installation
 - **URLs**: Replaced wildcard download URLs with working concrete versions
 
-### Removed
-- **Confusion**: Eliminated mixed naming between `blacklist_ips` and `blacklist_inbound`
-- **Fragility**: Removed dependency on user crontab that gets lost on reboot
+## [2.0.9] - 2025-08-26
+
+### Fixed
+- **Documentation**: Fixed wildcard URLs that don't work with `fetch`/`wget` commands
+- **Documentation**: All download links now use concrete version numbers
+- **Naming**: Unified all references to use `blacklist_inbound` (eliminated confusion)
+
+### Added
+- **Documentation**: Alternative installation methods (latest vs specific version)
+- **Installation**: Better cron service restart handling
+
+### Changed
+- **Documentation**: All aliases and references now consistently use `blacklist_inbound`
+- **URLs**: Replaced wildcard download URLs with working concrete versions
 
 ## [2.0.8] - 2025-08-26
 
 ### Fixed
 - **OPNsense**: Fixed VERSION display showing only "-opnsense" instead of full version number
 - **Documentation**: Corrected invalid pfctl firewall rule command in documentation
-- **Documentation**: Clarified confusion between pfctl table `blacklist_inbound` and OPNsense alias `blacklist_ips`
+- **Documentation**: Clarified confusion between pfctl table `blacklist_inbound` and OPNsense alias
 
 ### Added
 - **Documentation**: Clear explanation of dual-system approach (pfctl + OPNsense alias)
 - **Documentation**: Method recommendations (Web GUI vs Command Line)
-- **Documentation**: Comprehensive setup guide with step-by-step instructions
-- **Installation**: Enhanced setup guide created during installation at `/tmp/opnsense-setup-guide.txt`
+- **Installation**: Enhanced setup guide created during installation
 
 ### Changed
 - **Documentation**: Removed incorrect pfctl firewall rule syntax
 - **Documentation**: Emphasized Web GUI method as recommended approach
-- **Build**: Improved VERSION handling in OPNsense build script
-- **Installation**: Better user guidance during OPNsense installation process
-
-### Clarified
-- **OPNsense**: The service creates BOTH a pfctl table AND an OPNsense alias for maximum flexibility
-- **Usage**: Web GUI method with `blacklist_ips` alias is recommended for most users
-- **Advanced**: pfctl table `blacklist_inbound` available for command-line monitoring
-- **Rules**: All firewall rules must be configured through OPNsense Web GUI, not command line
 
 ## [2.0.7] - 2025-08-25
 
@@ -67,13 +101,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Documentation**: Comprehensive OPNsense setup guide with critical alias refresh configuration
 - **Documentation**: Detailed troubleshooting section for OPNsense deployments
-- **Documentation**: Performance metrics and monitoring guidelines
 - **OPNsense**: Automatic cronjob configuration during installation (every 4 hours)
 
 ### Changed
 - **OPNsense**: Installation process now runs without warnings on proper OPNsense systems
 - **Documentation**: Emphasized critical 2-hour alias refresh frequency requirement
-- **Build**: OPNsense package no longer requires external VERSION file
 
 ## [2.0.6] - 2025-08-24
 
@@ -169,6 +201,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
+- **2.0.12**: Performance restoration and consistency fixes
+- **2.0.11**: VERSION file handling and naming consistency
+- **2.0.10**: Persistent cron job and documentation fixes
+- **2.0.9**: Unified naming and URL fixes
 - **2.0.8**: Documentation fixes and VERSION display correction
 - **2.0.7**: OPNsense fixes and comprehensive documentation
 - **2.0.6**: Build system improvements and VERSION file handling
