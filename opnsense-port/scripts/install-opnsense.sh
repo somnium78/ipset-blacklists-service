@@ -27,6 +27,9 @@ chmod +x /usr/local/bin/ipset-blacklist-*
 echo "⚙️  Installing configuration..."
 cp etc/blacklist-sources.conf /usr/local/etc/
 
+echo "📝 Creating version file..."
+echo "2.0.9-opnsense" > /usr/local/etc/blacklist_version
+
 echo "⏰ Setting up persistent cron job..."
 # Remove any existing user cron jobs
 crontab -l 2>/dev/null | grep -v "ipset-blacklist-opnsense" | crontab - 2>/dev/null || true
@@ -93,4 +96,5 @@ echo ""
 echo "⏰ Persistent cron job: /usr/local/etc/cron.d/ipset-blacklist"
 echo "📝 Logs: /var/log/blacklist.log"
 echo "⚙️  Config: /usr/local/etc/blacklist-sources.conf"
+echo "🔧 Version: /usr/local/etc/blacklist_version"
 echo "📋 Setup Guide: /tmp/opnsense-setup-guide.txt"

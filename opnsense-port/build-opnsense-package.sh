@@ -9,13 +9,13 @@ elif [ -f VERSION ]; then
     BASE_VERSION=$(cat VERSION)
     VERSION="${BASE_VERSION}-opnsense"
 else
-    BASE_VERSION="2.0.8"
-    VERSION="2.0.8-opnsense"
+    BASE_VERSION="2.0.9"
+    VERSION="2.0.9-opnsense"
 fi
 
 PACKAGE_NAME="ipset-blacklists-opnsense"
 BUILD_DIR="build"
-PACKAGE_DIR="${BUILD_DIR}/${PACKAGE_NAME}-${VERSION}"
+PACKAGE_DIR="${BUILD_DIR}/${PACKAGE_NAME}-${BASE_VERSION}"
 
 echo "Building ${PACKAGE_NAME} v${VERSION}"
 
@@ -30,12 +30,7 @@ mkdir -p "$PACKAGE_DIR/scripts"
 mkdir -p "$PACKAGE_DIR/docs"
 
 # Copy and modify main binary with embedded version
-sed "s/VERSION=\$(cat VERSION)/VERSION=\"${VERSION}\"/" bin/ipset-blacklist-opnsense > "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
-
-# Also fix any other VERSION references
-sed -i "s/VERSION=\"\$VERSION\"/VERSION=\"${VERSION}\"/" "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
-sed -i "s/v\$VERSION/v${VERSION}/" "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
-
+sed "s/VERSION=\"2\.0\.9-opnsense\"/VERSION=\"${VERSION}\"/" bin/ipset-blacklist-opnsense > "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
 chmod +x "$PACKAGE_DIR/bin/ipset-blacklist-opnsense"
 
 # Copy other binaries normally
@@ -49,10 +44,13 @@ cp scripts/* "$PACKAGE_DIR/scripts/"
 cp docs/* "$PACKAGE_DIR/docs/"
 chmod +x "$PACKAGE_DIR/scripts/"*
 
+# Update install script with correct version
+sed -i "s/echo \"2\.0\.9-opnsense\"/echo \"${VERSION}\"/" "$PACKAGE_DIR/scripts/install-opnsense.sh"
+
 # Create tarball
 cd "$BUILD_DIR"
-tar -czf "../${PACKAGE_NAME}-${VERSION}.tar.gz" "${PACKAGE_NAME}-${VERSION}/"
+tar -czf "../${PACKAGE_NAME}-${BASE_VERSION}-opnsense.tar.gz" "${PACKAGE_NAME}-${BASE_VERSION}/"
 cd ..
 
-echo "✅ Built: ${PACKAGE_NAME}-${VERSION}.tar.gz"
+echo "✅ Built: ${PACKAGE_NAME}-${BASE_VERSION}-opnsense.tar.gz"
 ls -la *.tar.gz
