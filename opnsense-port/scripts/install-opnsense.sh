@@ -28,7 +28,7 @@ echo "⚙️  Installing configuration..."
 cp etc/blacklist-sources.conf /usr/local/etc/
 
 echo "📝 Creating version file..."
-echo "2.0.12-opnsense" > /usr/local/etc/blacklist_version
+echo "2.0.13-opnsense" > /usr/local/etc/blacklist_version
 
 echo "⏰ Setting up persistent cron job..."
 # Remove any existing user cron jobs

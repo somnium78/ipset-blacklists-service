@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.12] - 2025-08-27
+## [2.0.13] - 2025-08-27
 
 ### Fixed
 - **Performance**: Restored original fast pfctl bulk operations (reverted from slow individual IP additions)
@@ -201,7 +201,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
-- **2.0.12**: Performance restoration and consistency fixes
+- **2.0.13**: Performance restoration and consistency fixes
 - **2.0.11**: VERSION file handling and naming consistency
 - **2.0.10**: Persistent cron job and documentation fixes
 - **2.0.9**: Unified naming and URL fixes

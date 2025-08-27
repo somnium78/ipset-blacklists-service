@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # ipset Blacklist Service Uninstaller
-# Version: 2.0.12
+# Version: 2.0.13
 
 set -e
 
-echo "=== ipset Blacklist Service Uninstaller v2.0.12 ==="
+echo "=== ipset Blacklist Service Uninstaller v2.0.13 ==="
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
