@@ -25,28 +25,53 @@ jobs:
     - name: Update VERSION file
       run: echo "${{ steps.version.outputs.VERSION }}" > VERSION
 
-    - name: Build Linux DEB package
+    - name: Debug - List build directory
+      run: |
+        echo "=== Current directory ==="
+        pwd
+        echo "=== Build directory contents ==="
+        ls -la build/
+        echo "=== File permissions ==="
+        ls -la build/build-linux.sh
+        ls -la build/build-opnsense.sh
+
+    - name: Make build scripts executable
       run: |
         chmod +x build/build-linux.sh
+        chmod +x build/build-opnsense.sh
+
+    - name: Build Linux DEB package
+      run: |
+        echo "Building Linux package..."
         ./build/build-linux.sh
 
     - name: Build OPNsense package
       run: |
-        chmod +x build/build-opnsense.sh
+        echo "Building OPNsense package..."
         ./build/build-opnsense.sh
 
     - name: Verify packages
       run: |
         echo "=== Linux Package Contents ==="
         if [ -f build/linux/*.deb ]; then
-          dpkg -c build/linux/*.deb | head -20
+          ls -la build/linux/
+          if command -v dpkg >/dev/null 2>&1; then
+            dpkg -c build/linux/*.deb | head -20
+          fi
+        else
+          echo "No DEB package found!"
+          ls -la build/
         fi
 
         echo "=== OPNsense Package Contents ==="
         if [ -f build/opnsense/*.tar.gz ]; then
+          ls -la build/opnsense/
           tar -tzf build/opnsense/*.tar.gz | head -20
           echo "Checking for monitoring directory..."
           tar -tzf build/opnsense/*.tar.gz | grep -E "(monitoring/|ipset_blacklist_opnsense)" || echo "Monitoring files missing!"
+        else
+          echo "No OPNsense package found!"
+          ls -la build/
         fi
 
     - name: Create Release

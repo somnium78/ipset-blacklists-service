@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="2.0.15-opnsense"
+VERSION="2.0.17-opnsense"
 PACKAGE_NAME="ipset-blacklists-opnsense"
 BUILD_DIR="build"
 
