@@ -1,0 +1,116 @@
+#!/bin/sh
+
+# Check_MK Agent Plugin for OPNsense Blacklist Service
+# Returns service status, entry count, and performance data
+
+TABLE_NAME="blacklist_inbound"
+WORK_DIR="/var/db/blacklist"
+LOG_FILE="/var/log/blacklist.log"
+
+# Initialize status
+status=0
+status_text="OK"
+perfdata=""
+details=""
+
+# Check if pfctl table exists and get entry count
+if pfctl -t "$TABLE_NAME" -T show >/dev/null 2>&1; then
+    entry_count=$(pfctl -t "$TABLE_NAME" -T show 2>/dev/null | wc -l | tr -d ' ')
+
+    if [ -n "$entry_count" ] && [ "$entry_count" -gt 0 ]; then
+        details="pfctl table active with $entry_count entries"
+        perfdata="entries=${entry_count};;;0;"
+
+        # Check if entry count is suspiciously low (less than 1000)
+        if [ "$entry_count" -lt 1000 ]; then
+            status=1
+            status_text="WARNING"
+            details="$details (suspiciously low entry count)"
+        fi
+    else
+        status=2
+        status_text="CRITICAL"
+        details="pfctl table exists but has no entries"
+        perfdata="entries=0;;;0;"
+    fi
+else
+    status=2
+    status_text="CRITICAL"
+    details="pfctl table $TABLE_NAME not found"
+    perfdata="entries=0;;;0;"
+fi
+
+# Check pfctl firewall rule
+if ! pfctl -sr 2>/dev/null | grep -q "$TABLE_NAME"; then
+    if [ $status -lt 2 ]; then
+        status=1
+        status_text="WARNING"
+    fi
+    details="$details, pfctl rule missing"
+fi
+
+# Check log file age (should be updated within last 6 hours)
+if [ -f "$LOG_FILE" ]; then
+    log_age=$(( $(date +%s) - $(stat -f %m "$LOG_FILE" 2>/dev/null || echo 0) ))
+    log_age_hours=$(( log_age / 3600 ))
+
+    if [ $log_age_hours -gt 6 ]; then
+        if [ $status -lt 1 ]; then
+            status=1
+            status_text="WARNING"
+        fi
+        details="$details, log file older than 6 hours"
+    fi
+
+    perfdata="$perfdata log_age_hours=${log_age_hours};6;12;0;"
+else
+    if [ $status -lt 1 ]; then
+        status=1
+        status_text="WARNING"
+    fi
+    details="$details, log file missing"
+    perfdata="$perfdata log_age_hours=999;6;12;0;"
+fi
+
+# Check work directory
+if [ ! -d "$WORK_DIR" ]; then
+    status=2
+    status_text="CRITICAL"
+    details="$details, work directory missing"
+fi
+
+# Check statistics file for additional info
+STATS_FILE="$WORK_DIR/stats.txt"
+if [ -f "$STATS_FILE" ]; then
+    # Extract last update time and source success rate
+    last_update=$(grep "^last_update=" "$STATS_FILE" 2>/dev/null | cut -d'=' -f2)
+    total_sources=$(grep "^total_sources=" "$STATS_FILE" 2>/dev/null | cut -d'=' -f2)
+    successful_sources=$(grep "^successful_sources=" "$STATS_FILE" 2>/dev/null | cut -d'=' -f2)
+
+    if [ -n "$total_sources" ] && [ -n "$successful_sources" ]; then
+        success_rate=$(( successful_sources * 100 / total_sources ))
+        perfdata="$perfdata success_rate=${success_rate}%;80;50;0;100"
+
+        # Warning if less than 80% of sources successful
+        if [ $success_rate -lt 80 ]; then
+            if [ $status -lt 1 ]; then
+                status=1
+                status_text="WARNING"
+            fi
+            details="$details, only $successful_sources/$total_sources sources successful"
+        fi
+    fi
+fi
+
+# Check cron job configuration
+CRON_FILE="/usr/local/etc/cron.d/ipset-blacklist"
+if [ ! -f "$CRON_FILE" ]; then
+    if [ $status -lt 1 ]; then
+        status=1
+        status_text="WARNING"
+    fi
+    details="$details, cron job not configured"
+fi
+
+# Output in Check_MK format
+echo "$status ipset_blacklist - $status_text - $details|$perfdata"

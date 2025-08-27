@@ -5,7 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.14] - 2025-08-27
+
+### Added
+- **Monitoring**: Complete Check_MK integration for OPNsense deployments
+- **Monitoring**: Tracks entry count, pfctl rules, log age, source success rate, and cron job status
+- **Installation**: Automatic Check_MK plugin deployment during installation
+- **Documentation**: Comprehensive OPNsense README with monitoring section
+- **Uninstall**: Enhanced uninstall script with Check_MK plugin removal
+
+### Enhanced
+- **Installation**: Check_MK agent detection and automatic plugin installation
+- **Monitoring**: FreeBSD-specific monitoring with pfctl table checks
+- **Documentation**: Complete monitoring setup and troubleshooting guide
+- **Uninstall**: Interactive confirmation for data removal
+
+### Fixed
+- **Monitoring**: FreeBSD-compatible stat commands for log age detection
+- **Monitoring**: pfctl rule detection instead of iptables
+- **Installation**: Proper Check_MK plugin permissions and location
+
+### Technical Details
+- Check_MK plugin monitors pfctl tables instead of ipset
+- FreeBSD-specific file stat commands (`stat -f %m`)
+- Automatic detection of Check_MK agent directory
+- Professional monitoring thresholds and performance data
+
 ## [2.0.13] - 2025-08-27
+
+### Fixed
+- **Status**: Cron job detection now checks correct location `/usr/local/etc/cron.d/`
+- **Status**: Enhanced cron service status detection with PID display
+- **Status**: FreeBSD-compatible system log checking for cron activity
+- **Diagnostics**: Better cron job schedule display and next run calculation
+
+### Enhanced
+- **Status**: More detailed cron job information and diagnostics
+- **Logging**: FreeBSD-specific log file locations for cron monitoring
+- **Documentation**: Improved troubleshooting information
+
+### Technical Details
+- Fixed cron job detection path in status script
+- Added FreeBSD-specific process checking with `pgrep`
+- Enhanced system log analysis for cron execution tracking
+
+## [2.0.12] - 2025-08-27
 
 ### Fixed
 - **Performance**: Restored original fast pfctl bulk operations (reverted from slow individual IP additions)
@@ -201,7 +245,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
-- **2.0.13**: Performance restoration and consistency fixes
+- **2.0.14**: Check_MK monitoring integration and enhanced uninstall
+- **2.0.13**: Fixed cron job detection and enhanced diagnostics
+- **2.0.12**: Performance restoration and consistency fixes
 - **2.0.11**: VERSION file handling and naming consistency
 - **2.0.10**: Persistent cron job and documentation fixes
 - **2.0.9**: Unified naming and URL fixes

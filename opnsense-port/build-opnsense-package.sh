@@ -9,8 +9,8 @@ elif [ -f VERSION ]; then
     BASE_VERSION=$(cat VERSION)
     VERSION="${BASE_VERSION}-opnsense"
 else
-    BASE_VERSION="2.0.13"
-    VERSION="2.0.13-opnsense"
+    BASE_VERSION="2.0.14"
+    VERSION="2.0.14-opnsense"
 fi
 
 PACKAGE_NAME="ipset-blacklists-opnsense"

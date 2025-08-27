@@ -9,6 +9,7 @@ Professional blacklist service for OPNsense using pfctl tables and aliases inste
 - ⏰ **Cron-based** - Automatic updates every 4 hours
 - 📊 **Status monitoring** - Easy status checking and statistics
 - 🧹 **Log management** - Automatic log rotation
+- ✅ **Check_MK Monitoring**: Enterprise monitoring integration
 - 🔧 **Easy management** - Simple install/uninstall scripts
 
 ## 🎯 Quick Start
@@ -16,9 +17,9 @@ Professional blacklist service for OPNsense using pfctl tables and aliases inste
 ### Installation
 ```bash
 # Method 1: Direct download from GitHub releases
-fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.13-opnsense.tar.gz
-tar -xzf ipset-blacklists-opnsense-2.0.13-opnsense.tar.gz
-cd ipset-blacklists-opnsense-2.0.13-opnsense
+fetch https://github.com/somnium78/ipset-blacklists-service/releases/latest/download/ipset-blacklists-opnsense-2.0.14-opnsense.tar.gz
+tar -xzf ipset-blacklists-opnsense-2.0.14-opnsense.tar.gz
+cd ipset-blacklists-opnsense-2.0.14-opnsense
 
 # Install
 ./scripts/install-opnsense.sh
@@ -139,7 +140,6 @@ vi /usr/local/etc/blacklist-sources.conf
 ```
 
 # 📊 Monitoring
-
 Status command: /usr/local/bin/ipset-blacklist-status
 
 Shows:
@@ -148,6 +148,15 @@ Shows:
 - ⏰ Cron job status
 - 🔥 Firewall rule integration
 - 📝 Recent log entries
+
+## Monitoring with Check_MK
+The service includes a Check_MK plugin that monitors:
+- Entry Count: Number of blacklisted IPs
+- pfctl Rules: Firewall rule presence
+- Log Age: Last update timestamp
+- Source Success: Blacklist source availability
+- Cron Job: Automatic update configuration
+
 
 # 🔧 Files and Locations
 

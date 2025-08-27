@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ipset Blacklist Service Installer
-# Version: 2.0.13
+# Version: 2.0.14
 
 set -e
 

@@ -11,7 +11,7 @@ VERSION_FILE="/usr/local/etc/blacklist_version"
 if [ -f "$VERSION_FILE" ]; then
     VERSION=$(cat "$VERSION_FILE" 2>/dev/null || echo "2.0.11-opnsense")
 else
-    VERSION="2.0.13-opnsense"
+    VERSION="2.0.14-opnsense"
 fi
 
 # Configuration
