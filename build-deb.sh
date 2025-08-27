@@ -5,7 +5,7 @@ set -e
 if [ -f VERSION ]; then
     VERSION=$(cat VERSION)
 else
-    VERSION="2.0.14"
+    VERSION="2.0.15"
 fi
 
 PACKAGE_NAME="ipset-blacklists-service"

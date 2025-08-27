@@ -61,7 +61,7 @@ if [ -f "$PROJECT_ROOT/../VERSION" ]; then
 elif [ -f "$PROJECT_ROOT/VERSION" ]; then
     cp "$PROJECT_ROOT/VERSION" /usr/local/etc/blacklist_version
 else
-    echo "2.0.14-opnsense" > /usr/local/etc/blacklist_version
+    echo "2.0.15-opnsense" > /usr/local/etc/blacklist_version
 fi
 
 echo "⏰ Setting up persistent cron job..."
